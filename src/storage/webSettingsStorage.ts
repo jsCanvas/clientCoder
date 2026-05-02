@@ -1,13 +1,6 @@
-import type { SettingsStorage } from '@phoneBot/storage/settingsStorage';
+import type { ClientSettings, SettingsStorage } from '@phoneBot/storage/settingsStorage';
 
-export type ClientSettings = {
-  apiBaseUrl: string;
-  selectedProjectId?: string;
-  selectedSessionId?: string;
-  activeModelConfigId?: string;
-  enabledSkillNames?: string[];
-  enabledMcpNames?: string[];
-};
+export type { ClientSettings };
 
 const SETTINGS_KEY = 'phonebot.client.settings';
 
@@ -50,7 +43,7 @@ export class WebPersistence {
   }
 }
 
-/** API helpers expect nominal `SettingsStorage` — persistence is duck-compatible. */
+/** API helpers expect `SettingsStorage` — `WebPersistence` is structurally compatible. */
 export function phoneBotStorage(persistence: WebPersistence): SettingsStorage {
-  return persistence as unknown as SettingsStorage;
+  return persistence;
 }

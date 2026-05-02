@@ -9,11 +9,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@phoneBot': path.resolve(__dirname, '../phoneBot/src'),
-      '@react-native-async-storage/async-storage': path.resolve(
-        __dirname,
-        'src/shims/async-storage-shim.ts',
-      ),
+      '@phoneBot': path.resolve(__dirname, 'src/phoneBot'),
     },
   },
   server: {

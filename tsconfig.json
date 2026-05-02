@@ -16,8 +16,7 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@phoneBot/*": ["../phoneBot/src/*"],
-      "@react-native-async-storage/async-storage": ["./src/shims/async-storage-shim.ts"]
+      "@phoneBot/*": ["./src/phoneBot/*"]
     }
   },
   "include": ["src"]
