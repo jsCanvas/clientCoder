@@ -11,6 +11,7 @@ import {
   removeFileTreeNode,
   shouldLoadDirectoryChildren,
   toggleExpandedPath,
+  WORKSPACE_ROOT_PATH,
 } from '@phoneBot/screens/fileTree';
 import { getMonacoLanguage } from '@phoneBot/screens/fileEditor';
 import {
@@ -256,6 +257,7 @@ export function IdeApp({ defaultApiBaseUrl = DEFAULT_API_BASE_URL }: IdeAppProps
       setActiveTabPath(null);
       return;
     }
+    setExpanded(new Set([WORKSPACE_ROOT_PATH]));
     void loadRootTree(project.id);
     void bootstrapGitRuntime(project.id);
     void refreshSessions(project.id);
@@ -313,7 +315,14 @@ export function IdeApp({ defaultApiBaseUrl = DEFAULT_API_BASE_URL }: IdeAppProps
     }
   }
 
-  const flatTree = useMemo(() => flattenVisibleTree(tree, expanded), [tree, expanded]);
+  const explorerTree = useMemo((): FileTreeNode[] => {
+    if (!project) return [];
+    const segments = project.workdir.replace(/\\/g, '/').split('/').filter(Boolean);
+    const rootLabel = segments.length ? segments[segments.length - 1]! : project.slug || project.name;
+    return [{ name: rootLabel, path: WORKSPACE_ROOT_PATH, type: 'dir', children: tree }];
+  }, [project, tree]);
+
+  const flatTree = useMemo(() => flattenVisibleTree(explorerTree, expanded), [explorerTree, expanded]);
 
   const filteredTreeRows = useMemo(() => {
     const q = searchFilter.trim().toLowerCase();
@@ -323,6 +332,10 @@ export function IdeApp({ defaultApiBaseUrl = DEFAULT_API_BASE_URL }: IdeAppProps
 
   async function toggleDirectory(item: FileTreeNode) {
     if (!project) return;
+    if (item.path === WORKSPACE_ROOT_PATH) {
+      setExpanded((current) => toggleExpandedPath(current, item.path));
+      return;
+    }
     const wasExpanded = expanded.has(item.path);
     setExpanded((current) => toggleExpandedPath(current, item.path));
     if (!shouldLoadDirectoryChildren(item, wasExpanded)) return;
@@ -810,27 +823,44 @@ export function IdeApp({ defaultApiBaseUrl = DEFAULT_API_BASE_URL }: IdeAppProps
                           type="button"
                           className="ide-tree-act ide-tree-act-runtime"
                           title={t('tree.runtime')}
-                          aria-label={t('tree.runtimeStartAria', { path: node.path })}
+                          aria-label={
+                            node.path === WORKSPACE_ROOT_PATH
+                              ? t('tree.runtimeStartWorkspaceAria', { path: project.workdir })
+                              : t('tree.runtimeStartAria', { path: node.path })
+                          }
                           onClick={(event) => {
                             event.stopPropagation();
-                            project && void apiClient.runtimeUp(project.id, { composePath: node.path }).catch(() => {});
+                            if (!project) return;
+                            if (node.path === WORKSPACE_ROOT_PATH) {
+                              void apiClient
+                                .runtimeUp(project.id)
+                                .then((dto) => {
+                                  setRuntime(dto);
+                                  if (dto.preview_url) window.open(dto.preview_url, '_blank', 'noopener,noreferrer');
+                                })
+                                .catch(() => {});
+                              return;
+                            }
+                            void apiClient.runtimeUp(project.id, { composePath: node.path }).catch(() => {});
                           }}
                         >
                           🐋
                         </button>
                       ) : null}
-                      <button
-                        type="button"
-                        className="ide-tree-act ide-tree-act-delete"
-                        aria-label={t('tree.deleteAria', { path: node.path })}
-                        title={t('tree.deleteAria', { path: node.path })}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setPendingDelete({ path: node.path, type: node.type });
-                        }}
-                      >
-                        ×
-                      </button>
+                      {node.path === WORKSPACE_ROOT_PATH ? null : (
+                        <button
+                          type="button"
+                          className="ide-tree-act ide-tree-act-delete"
+                          aria-label={t('tree.deleteAria', { path: node.path })}
+                          title={t('tree.deleteAria', { path: node.path })}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setPendingDelete({ path: node.path, type: node.type });
+                          }}
+                        >
+                          ×
+                        </button>
+                      )}
                     </span>
                   </div>
                 );

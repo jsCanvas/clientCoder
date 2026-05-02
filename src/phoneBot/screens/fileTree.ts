@@ -1,5 +1,8 @@
 import type { FileTreeNode } from '../types/api';
 
+/** Virtual file-tree row for the project workspace root (not a real API path). */
+export const WORKSPACE_ROOT_PATH = '\0workspace-root';
+
 export type FileTreeRequestOptions = {
   dir?: string;
   depth?: number;

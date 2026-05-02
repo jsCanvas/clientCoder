@@ -47,6 +47,7 @@ const EN = {
 
   'tree.runtime': 'Runtime',
   'tree.runtimeStartAria': 'Start runtime at {{path}}',
+  'tree.runtimeStartWorkspaceAria': 'Start runtime at workspace root ({{path}})',
   'tree.deleteAria': 'Delete {{path}}',
 
   'search.filterHint': 'Filter file list',
@@ -256,6 +257,7 @@ const ZH: Record<MessageKey, string> = {
 
   'tree.runtime': '运行时',
   'tree.runtimeStartAria': '启动运行时 {{path}}',
+  'tree.runtimeStartWorkspaceAria': '在工作区根目录启动运行时（{{path}}）',
   'tree.deleteAria': '删除 {{path}}',
 
   'search.filterHint': '过滤文件列表',
